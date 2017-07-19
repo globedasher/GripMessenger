@@ -1,0 +1,23 @@
+# This is the grip.kv file for the matching grip.py file
+
+<HomeScreen>:
+    BoxLayout:
+        text_input: text_input
+        orientation: "vertical"
+
+        # Label across the top of the application
+        Label:
+            text: app.name
+            color: 0, 1, 0, 1
+            size_hint: 1, .1
+
+        TextInput:
+            id: text_input
+        
+        # BoxLayout with the Lights On/Off buttons.
+        BoxLayout:
+            orientation: "horizontal"
+            Button:
+                text: "Send"
+                on_release: root.send(text_input)
+                size_hint: 1, .1
