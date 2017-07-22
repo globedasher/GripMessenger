@@ -1,23 +1,42 @@
 # This is the grip.kv file for the matching grip.py file
 
 <HomeScreen>:
+    # Variables linking to python code
+    message_input: message_input
+    message_display: message_display
+
     BoxLayout:
-        text_input: text_input
+        # Layout configuration
         orientation: "vertical"
+
 
         # Label across the top of the application
         Label:
-            text: app.name
+            text: "Grip Messenger"
             color: 0, 1, 0, 1
-            size_hint: 1, .1
+            background_color: 0, 0, 0, 1
+            size_hint: 1, .06
 
         TextInput:
-            id: text_input
+            id: message_display
+            foreground_color: 1, 1, 1, 1
+            background_color: 0, 0, 0, 1
+
         
-        # BoxLayout with the Lights On/Off buttons.
+        # BoxLayout with the TextInput and Send button
         BoxLayout:
             orientation: "horizontal"
+            size_hint: 1, .1
+
+            Label:
+                text: "Message:"
+                size_hint: .1, 1
+
+            TextInput:
+                id: message_input
+                focus: True
+
             Button:
                 text: "Send"
-                on_release: root.send(text_input)
-                size_hint: 1, .1
+                on_release: root.send(message_input)
+                size_hint: .1, 1
