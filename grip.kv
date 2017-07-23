@@ -35,8 +35,14 @@
             TextInput:
                 id: message_input
                 focus: True
+                multiline: False
+                on_text_validate: root.on_enter(message_input)
 
             Button:
                 text: "Send"
                 on_release: root.send(message_input)
+                size_hint: .1, 1
+            Button:
+                text: "Disconnect"
+                on_release: root.disconnect()
                 size_hint: .1, 1
