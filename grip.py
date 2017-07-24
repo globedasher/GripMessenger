@@ -1,7 +1,9 @@
 # This is the grip.py file for the matching grip.kv file
 
 #Module imports
-import os, sys, _thread
+import os, sys, _thread, pickle
+import datetime
+import paho.mqtt.client as mqtt
 
 
 from kivy.app import App
@@ -15,12 +17,7 @@ from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.uix.label import Label
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.behaviors import FocusBehavior
-from datetime import datetime
 
-import paho.mqtt.client as mqtt
-
-#Local imports
-#import comms
 
 print("Welcome to Grip Messenger!")
 
@@ -72,17 +69,6 @@ class HomeScreen(Screen):
 
         client.subscribe("grip/messages", qos=0)
 
-    def on_disconnect(self, client, userdata, rc):
-        if rc != 0:
-            client.publish("grip/pub/connect", "Disconnected", qos=0, retain=True)
-            print("Unexpected disconnect")
-        else:
-            print("Disconnect Complete")
-
-    #def on_publish(self, client, userdata, mid):
-        #print(mid)
-
-    # DONE: Cat new messages onto view
     def on_message(self, client, userdata, msg):
         """Callback triggered when a message is recieved.
         """
@@ -91,40 +77,41 @@ class HomeScreen(Screen):
         #print(msg.payload)
         # Decode the msg.payload from bytearray to UTF-8 then cat onto the
         # message_display.
-        self.message_display.text += (
-                "%s said: %s \n" % (
-                    userdata,
-                    str(msg.payload.decode('utf-8'))))
+        payload = pickle.loads(msg.payload)
+        print(payload)
+        self.message_display.text += "%s %s %s: %s\n" % (
+                payload["date"],
+                payload["time"],
+                payload["name"],
+                payload["text"]
+                )
 
-    def send(self, data):
-        """Send uses the publish() method to send data to the MQTT broker.
-        """
-        #data is the object passed from the kivy app TextInput function
-
-        #print(data.text)
-        # TODO: change payload to be dictionary with more attributes for each
-        # message.
-        payload = data.text
-        #message_stack.append(payload)
-        #print(message_stack)
-        #print(self.message_display.text)
-        #print(self.message_input.text)
-        return_value = self.client.publish("grip/messages", payload, qos=0)
-        #print(return_value)
-        if return_value[0] != 0:
-            print("Send error")
-        else:
-            print("Sent")
-            #print("Messge id: %d" % return_value[1])
-        # DONE: Refresh the text display.
-        #self.message_display.text += payload + "\n"
-        data.text = ""
-
-    # DONE: Enter button send function.
     def on_enter(self, data):
         """This function allows an enter to send a message.
         """
         self.send(data)
+
+    def send(self, data):
+        """Send uses the publish() method to send data to the MQTT broker.
+        """
+        # data is the object passed from the kivy app TextInput function
+        # data.text is the actual text from that object.
+        # TODO: change payload to be dictionary with more attributes for each
+        # message.
+        payload = {
+                "name": user_name,
+                "text": data.text,
+                "date": str(datetime.date.today()),
+                "time": str(datetime.time()),
+                }
+        ppayload = pickle.dumps(payload)
+        self.client.publish("grip/messages", ppayload, qos=0)
+        # TODO: Track success of publish with return_value.
+        data.text = ""
+
+    def on_publish(self, client, userdata, mid):
+        #print(mid)
+        pass
 
     def disconnect(self):
         """Disconnect from the MQTT server and stop the application.
@@ -132,6 +119,13 @@ class HomeScreen(Screen):
         self.client.disconnect()
         print("Performed disconnect")
         app.stop()
+
+    def on_disconnect(self, client, userdata, rc):
+        if rc != 0:
+            client.publish("grip/pub/connect", "Disconnected", qos=0, retain=True)
+            print("Unexpected disconnect")
+        else:
+            print("Disconnect Complete")
 
 
 # DONE: This class creates the Main Application!
