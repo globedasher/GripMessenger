@@ -1,8 +1,7 @@
 # This is the grip.py file for the matching grip.kv file
 
 #Module imports
-import os, sys, _thread, pickle
-import datetime
+import os, sys, _thread, pickle, random, datetime
 import paho.mqtt.client as mqtt
 
 
@@ -23,7 +22,7 @@ print("Welcome to Grip Messenger!")
 
 # NOTE: I am creating a temporily hard coded user name to send and receive
 # messages.
-user_name = "Rocko"
+user_name = "vilan"
 message_stack = []
 
 # TODO: Display text in non-editable form.
@@ -131,9 +130,12 @@ class HomeScreen(Screen):
 # DONE: This class creates the Main Application!
 class GripApp(App):
     def build(self):
+        print(user_name)
+        if len(user_name) > 2:
+            input(print("Please enter user name"))
         # Instantiate the client at tag client.
         client = mqtt.Client(
-                client_id="12999",
+                client_id=str(random.random()),
                 clean_session=True,
                 userdata=user_name
                 )
@@ -144,5 +146,5 @@ class GripApp(App):
 # The following lines instantiate and run the application.
 if __name__ == "__main__":
     app = GripApp()
-    print(app)
+    #print(app)
     app.run()
