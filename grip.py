@@ -25,8 +25,11 @@ print("Welcome to Grip Messenger!")
 user_name = "vilan"
 message_stack = []
 
+# TODO: If client is disconnected, change disconnect button to connect button
+# TODO: Request user name before connecting.
 # TODO: Display text in non-editable form.
 # TODO: If user_name is blank, present dialog to request name.
+
 
 
 class Connection():
@@ -69,6 +72,8 @@ class Connection():
                 )
 
         client.subscribe("grip/messages", qos=0)
+        self.connection_status.state = "down"
+        self.connection_status.text = "Connected"
 
     def on_message(self, client, userdata, msg):
         """Callback triggered when a message is recieved.
@@ -89,15 +94,12 @@ class Connection():
 
     def on_disconnect(self, client, userdata, rc):
         if rc != 0:
-            client.publish(
-                    "grip/pub/connect",
-                    "Disconnected",
-                    qos=0,
-                    retain=True,
-                    )
             print("Unexpected disconnect")
         else:
+            self.connection_status.text = "disconnected"
+            self.connection_status.state = "normal"
             print("Disconnect Complete")
+            #app.stop()
 
 
 class HomeScreen(Screen, Connection):
@@ -105,6 +107,7 @@ class HomeScreen(Screen, Connection):
     """
     message_input = ObjectProperty(None)
     message_display = ObjectProperty(None)
+    connection_status = ObjectProperty(None)
 
     def __init__(self, **kwargs):
         """ Creates all the initial conditions for the HomeScreen.
@@ -142,9 +145,13 @@ class HomeScreen(Screen, Connection):
     def disconnect(self):
         """Disconnect from the MQTT server and stop the application.
         """
+        self.client.publish(
+                "grip/pub/connect",
+                "Disconnected",
+                qos=0,
+                retain=True,
+                )
         self.client.disconnect()
-        print("Performed disconnect")
-        app.stop()
 
 
 # DONE: This class creates the Main Application!

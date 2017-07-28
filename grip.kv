@@ -4,18 +4,28 @@
     # Variables linking to python code
     message_input: message_input
     message_display: message_display
+    connection_status: connection_status
 
     BoxLayout:
         # Layout configuration
         orientation: "vertical"
 
 
-        # Label across the top of the application
-        Label:
-            text: "Grip Messenger"
-            color: 0, 1, 0, 1
-            background_color: 0, 0, 0, 1
+        # Box across the top of the application
+        BoxLayout:
             size_hint: 1, .06
+
+            Label:
+                text: "Grip Messenger"
+                color: 0, 1, 0, 1
+                background_color: 0, 0, 0, 1
+
+            Button:
+                id: connection_status
+                disabled: True
+                text: str(self.state)
+                text: "Connecting..."
+                size_hint: .1, 1
 
         TextInput:
             id: message_display
@@ -43,7 +53,7 @@
                 on_release: root.send(message_input)
                 size_hint: .1, 1
             Button:
-                text: "Close/ \n Disconnect"
+                text: "Disconnect"
                 on_release: root.disconnect()
                 size_hint: .1, 1
                 
