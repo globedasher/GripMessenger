@@ -5,6 +5,7 @@
     message_input: message_input
     message_display: message_display
     connection_status: connection_status
+    button_status: button_status
 
     BoxLayout:
         # Layout configuration
@@ -25,6 +26,9 @@
                 disabled: True
                 text: str(self.state)
                 text: "Connecting..."
+                disabled_color: 1, 1, 1, 1
+                #background_disabled_down: "atlas://data/images/defaulttheme/button_pressed"
+                #background_disabled_normal: "atlas://data/images/defaulttheme/button"
                 size_hint: .1, 1
 
         TextInput:
@@ -53,8 +57,9 @@
                 on_release: root.send(message_input)
                 size_hint: .1, 1
             Button:
-                text: "Disconnect"
-                on_release: root.disconnect()
+                id: button_status
+                text: "Connect"
+                on_release: root.trigger()
                 size_hint: .1, 1
                 
 # The display manager manages all of the views available for this application.

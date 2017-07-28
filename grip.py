@@ -74,6 +74,7 @@ class Connection():
         client.subscribe("grip/messages", qos=0)
         self.connection_status.state = "down"
         self.connection_status.text = "Connected"
+        self.button_status.text = "Disonnect"
 
     def on_message(self, client, userdata, msg):
         """Callback triggered when a message is recieved.
@@ -96,7 +97,7 @@ class Connection():
         if rc != 0:
             print("Unexpected disconnect")
         else:
-            self.connection_status.text = "disconnected"
+            self.connection_status.text = "Disconnected"
             self.connection_status.state = "normal"
             print("Disconnect Complete")
             #app.stop()
@@ -108,6 +109,7 @@ class HomeScreen(Screen, Connection):
     message_input = ObjectProperty(None)
     message_display = ObjectProperty(None)
     connection_status = ObjectProperty(None)
+    button_status = ObjectProperty(None)
 
     def __init__(self, **kwargs):
         """ Creates all the initial conditions for the HomeScreen.
@@ -131,16 +133,13 @@ class HomeScreen(Screen, Connection):
                 "name": user_name,
                 "text": data.text,
                 "date": str(datetime.date.today()),
-                "time": str(datetime.time()),
+                "time": str(datetime.datetime.time(datetime.datetime.now())),
                 }
         ppayload = pickle.dumps(payload)
         self.client.publish("grip/messages", ppayload, qos=0)
         # TODO: Track success of publish with return_value.
         data.text = ""
-
-    def on_publish(self, client, userdata, mid):
-        #print(mid)
-        pass
+        data.focus = True
 
     def disconnect(self):
         """Disconnect from the MQTT server and stop the application.
@@ -152,6 +151,22 @@ class HomeScreen(Screen, Connection):
                 retain=True,
                 )
         self.client.disconnect()
+        self.button_status.text = "Connect"
+
+    def connect(self):
+        print("Connection attempted.")
+        self.client.connect("iot.eclipse.org", 1883, 60)
+
+    # Use this as a callback to reassign the function of a button depending
+    # on the connection status.
+    def trigger(self):
+        """This function will reassign the function of a button.
+        """
+        print(self.connection_status.text)
+        if self.connection_status.text == "Connected":
+            self.disconnect()
+        else:
+            self.connect()
 
 
 # DONE: This class creates the Main Application!
